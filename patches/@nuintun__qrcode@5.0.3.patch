@@ -1,0 +1,196 @@
+diff --git a/cjs/encoder/Encoder.cjs b/cjs/encoder/Encoder.cjs
+index d51567f26240a96e6745d3337db429038b40c282..0a339bcb5724bc95d5b60ad7f0eeb0bbdda7ad9b 100644
+--- a/cjs/encoder/Encoder.cjs
++++ b/cjs/encoder/Encoder.cjs
+@@ -19,6 +19,18 @@ const Version = require('../common/Version.cjs');
+ const index = require('../common/encoding/index.cjs');
+ const asserts = require('./utils/asserts.cjs');
+ 
++/**
++ * Structured Append header (ISO/IEC 18004): mode indicator 0011, the 4-bit symbol position,
++ * the 4-bit count minus one, and the 8-bit parity of the whole message. It precedes every other bit,
++ * so it is written once, at the head of the first segment.
++ */
++function appendStructuredAppendInfo(bits, { index, count, parity }) {
++  bits.append(0x03, 4);
++  bits.append(index, 4);
++  bits.append(count - 1, 4);
++  bits.append(parity, 8);
++}
++
+ /**
+  * @module Encoder
+  */
+@@ -48,7 +60,9 @@ class Encoder {
+   encode(...segments) {
+     const ecLevel = this.#level;
+     const encode = this.#encode;
+-    const { fnc1 } = this.#hints;
++    const { fnc1, structured } = this.#hints;
++    // Only append Structured Append once, before anything else.
++    let isStructuredAppended = false;
+     const versionNumber = this.#version;
+     const segmentBlocks = [];
+     // Only append FNC1 once.
+@@ -59,6 +73,10 @@ class Encoder {
+     for (const segment of segments) {
+       const { mode } = segment;
+       const head = new BitArray.BitArray();
++      if (structured != null && !isStructuredAppended) {
++        isStructuredAppended = true;
++        appendStructuredAppendInfo(head, structured);
++      }
+       const body = segment.encode(encode);
+       const length = encoder.getSegmentLength(segment, body);
+       // Append ECI segment if applicable.
+diff --git a/cjs/encoder/utils/asserts.cjs b/cjs/encoder/utils/asserts.cjs
+index 48d657ddd7f3c8fa60ed4fccef95851b2ec1cc58..dca582ad4d23c6d31cf32aba39335d9b26936c60 100644
+--- a/cjs/encoder/utils/asserts.cjs
++++ b/cjs/encoder/utils/asserts.cjs
+@@ -26,7 +26,7 @@ function assertCharset(charset) {
+   }
+ }
+ function assertHints(hints) {
+-  const { fnc1 } = hints;
++  const { fnc1, structured } = hints;
+   // FNC1.
+   if (fnc1 != null) {
+     const [mode] = fnc1;
+@@ -40,6 +40,19 @@ function assertHints(hints) {
+       }
+     }
+   }
++  // Structured Append.
++  if (structured != null) {
++    const { index, count, parity } = structured;
++    if (!Number.isInteger(count) || count < 1 || count > 16) {
++      throw new Error('illegal structured append count');
++    }
++    if (!Number.isInteger(index) || index < 0 || index >= count) {
++      throw new Error('illegal structured append index');
++    }
++    if (!Number.isInteger(parity) || parity < 0 || parity > 0xff) {
++      throw new Error('illegal structured append parity');
++    }
++  }
+ }
+ function assertLevel(level) {
+   if (['L', 'M', 'Q', 'H'].indexOf(level) < 0) {
+diff --git a/cjs/encoder/utils/encoder.d.cts b/cjs/encoder/utils/encoder.d.cts
+index 530f3bcddd960c5b507be77967a66e3133f3f627..e3e725fc3f5b045ba1b42cf889566103940ad7e9 100644
+--- a/cjs/encoder/utils/encoder.d.cts
++++ b/cjs/encoder/utils/encoder.d.cts
+@@ -15,6 +15,15 @@ import { Version } from '../../common/Version.cjs';
+ import { Alphanumeric } from '../segments/Alphanumeric.cjs';
+ export interface Hints {
+   fnc1?: FNC1;
++  /**
++   * Structured Append (ISO/IEC 18004): this symbol's 0-based position among `count` (1 to 16)
++   * symbols, and the 8-bit parity, the XOR of every byte of the whole message.
++   */
++  structured?: {
++    index: number;
++    count: number;
++    parity: number;
++  };
+ }
+ export interface SegmentBlock {
+   mode: Mode;
+diff --git a/esm/encoder/Encoder.js b/esm/encoder/Encoder.js
+index 9a183334c0fe43826ca3c14aa3630d61c746bacf..a0a25d3b847c814a3b6b84e832a77336ae84b0ba 100644
+--- a/esm/encoder/Encoder.js
++++ b/esm/encoder/Encoder.js
+@@ -30,6 +30,18 @@ import { VERSIONS } from '../common/Version.js';
+ import { encode } from '../common/encoding/index.js';
+ import { assertHints, assertLevel, assertVersion } from './utils/asserts.js';
+ 
++/**
++ * Structured Append header (ISO/IEC 18004): mode indicator 0011, the 4-bit symbol position,
++ * the 4-bit count minus one, and the 8-bit parity of the whole message. It precedes every other bit,
++ * so it is written once, at the head of the first segment.
++ */
++function appendStructuredAppendInfo(bits, { index, count, parity }) {
++  bits.append(0x03, 4);
++  bits.append(index, 4);
++  bits.append(count - 1, 4);
++  bits.append(parity, 8);
++}
++
+ /**
+  * @module Encoder
+  */
+@@ -59,7 +71,9 @@ class Encoder {
+   encode(...segments) {
+     const ecLevel = this.#level;
+     const encode = this.#encode;
+-    const { fnc1 } = this.#hints;
++    const { fnc1, structured } = this.#hints;
++    // Only append Structured Append once, before anything else.
++    let isStructuredAppended = false;
+     const versionNumber = this.#version;
+     const segmentBlocks = [];
+     // Only append FNC1 once.
+@@ -70,6 +84,10 @@ class Encoder {
+     for (const segment of segments) {
+       const { mode } = segment;
+       const head = new BitArray();
++      if (structured != null && !isStructuredAppended) {
++        isStructuredAppended = true;
++        appendStructuredAppendInfo(head, structured);
++      }
+       const body = segment.encode(encode);
+       const length = getSegmentLength(segment, body);
+       // Append ECI segment if applicable.
+diff --git a/esm/encoder/utils/asserts.js b/esm/encoder/utils/asserts.js
+index 5321270a1c8e857c32346d854595013f3c0f8861..7708ed5f8639c05263f266bd588deaa20dfa35da 100644
+--- a/esm/encoder/utils/asserts.js
++++ b/esm/encoder/utils/asserts.js
+@@ -24,7 +24,7 @@ function assertCharset(charset) {
+   }
+ }
+ function assertHints(hints) {
+-  const { fnc1 } = hints;
++  const { fnc1, structured } = hints;
+   // FNC1.
+   if (fnc1 != null) {
+     const [mode] = fnc1;
+@@ -38,6 +38,19 @@ function assertHints(hints) {
+       }
+     }
+   }
++  // Structured Append.
++  if (structured != null) {
++    const { index, count, parity } = structured;
++    if (!Number.isInteger(count) || count < 1 || count > 16) {
++      throw new Error('illegal structured append count');
++    }
++    if (!Number.isInteger(index) || index < 0 || index >= count) {
++      throw new Error('illegal structured append index');
++    }
++    if (!Number.isInteger(parity) || parity < 0 || parity > 0xff) {
++      throw new Error('illegal structured append parity');
++    }
++  }
+ }
+ function assertLevel(level) {
+   if (['L', 'M', 'Q', 'H'].indexOf(level) < 0) {
+diff --git a/esm/encoder/utils/encoder.d.ts b/esm/encoder/utils/encoder.d.ts
+index 65b50c1c0a99c12e566249a3d4f37ec29797a5b0..138d0fa977a8ea0604fc9322f6c0fb17f370f040 100644
+--- a/esm/encoder/utils/encoder.d.ts
++++ b/esm/encoder/utils/encoder.d.ts
+@@ -15,6 +15,15 @@ import { Version } from '../../common/Version.js';
+ import { Alphanumeric } from '../segments/Alphanumeric.js';
+ export interface Hints {
+   fnc1?: FNC1;
++  /**
++   * Structured Append (ISO/IEC 18004): this symbol's 0-based position among `count` (1 to 16)
++   * symbols, and the 8-bit parity, the XOR of every byte of the whole message.
++   */
++  structured?: {
++    index: number;
++    count: number;
++    parity: number;
++  };
+ }
+ export interface SegmentBlock {
+   mode: Mode;

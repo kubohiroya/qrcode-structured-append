@@ -1,0 +1,4 @@
+allowBuilds:
+  esbuild: false
+patchedDependencies:
+  '@nuintun/qrcode@5.0.3': patches/@nuintun__qrcode@5.0.3.patch
