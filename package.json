@@ -1,6 +1,6 @@
 {
   "name": "@kubohiroya/qrcode-structured-append",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "QR Code Structured Append (ISO/IEC 18004): split a message into up to 16 linked QR symbols, and join them back from any decoder's reads.",
   "author": "Hiroya Kubo <hiroya@cuc.ac.jp>",
   "license": "MPL-2.0",
@@ -12,7 +12,13 @@
   "bugs": {
     "url": "https://github.com/kubohiroya/qrcode-structured-append/issues"
   },
-  "keywords": ["qrcode", "qr", "structured-append", "iso-18004", "multipart"],
+  "keywords": [
+    "qrcode",
+    "qr",
+    "structured-append",
+    "iso-18004",
+    "multipart"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -20,7 +26,14 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist/", "src/", "README.md", "README.ja.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
+  "files": [
+    "dist/",
+    "src/",
+    "README.md",
+    "README.ja.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -47,5 +60,11 @@
     "vite": "^8.2.2",
     "vitest": "^5.0.0",
     "zxing-wasm": "3.1.4"
+  },
+  "gitHead": "775a1a21137d3b3b64b97ee82c202e54ec238057",
+  "x-turbowarp-source": {
+    "revision": "775a1a21137d3b3b64b97ee82c202e54ec238057",
+    "revisionRole": "base-commit",
+    "sourceState": "working-tree-release-overlay"
   }
 }
