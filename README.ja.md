@@ -1,5 +1,7 @@
 # qrcode-structured-append
 
+[English](README.md) | 日本語
+
 JavaScriptで扱う、QRコードの**連結QR（Structured Append、ISO/IEC 18004）**です。1つのメッセージを最大16枚の
 連結したQRシンボルに分け、どの復号器で読んだものからでも元に戻します。
 
