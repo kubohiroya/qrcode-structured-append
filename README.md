@@ -1,5 +1,7 @@
 # qrcode-structured-append
 
+English | [日本語](README.ja.md)
+
 QR Code **Structured Append** (ISO/IEC 18004) for JavaScript: split a message into up to 16 linked QR
 symbols, and join them back from whatever decoder read them.
 
