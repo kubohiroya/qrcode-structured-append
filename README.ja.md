@@ -59,7 +59,7 @@ hashを入れてください。
 
 ## 開発
 
-Node.js 22.18.0以上、pnpm 11.11.0。`pnpm run check`で、型検査、lint、テスト（作ったシンボルをzxing-cppで
+Node.js 24以上、pnpm 11.28.8。`pnpm run check`で、型検査、lint、テスト（作ったシンボルをzxing-cppで
 読み戻す）、ビルド、npmパッケージのdry runを行います。
 
 ## ライセンス
