@@ -60,7 +60,7 @@ No JavaScript QR encoder writes Structured Append headers today. This package bu
 
 ## Development
 
-Node.js >= 22.18.0 and pnpm 11.11.0. `pnpm run check` runs type checking, lint, the tests (which read
+Node.js >= 24 and pnpm 11.28.8. `pnpm run check` runs type checking, lint, the tests (which read
 the generated symbols back with zxing-cpp), the build and an npm package dry run.
 
 ## License
