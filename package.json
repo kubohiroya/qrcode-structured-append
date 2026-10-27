@@ -1,6 +1,6 @@
 {
   "name": "@kubohiroya/qrcode-structured-append",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "QR Code Structured Append (ISO/IEC 18004): split a message into up to 16 linked QR symbols, and join them back from any decoder's reads.",
   "author": "Hiroya Kubo <hiroya@cuc.ac.jp>",
   "license": "MPL-2.0",
@@ -61,10 +61,10 @@
     "vitest": "^5.0.0",
     "zxing-wasm": "3.1.4"
   },
-  "gitHead": "775a1a21137d3b3b64b97ee82c202e54ec238057",
+  "gitHead": "b5d051dbbc777add8d80104d02eed132b8e087da",
   "x-turbowarp-source": {
-    "revision": "775a1a21137d3b3b64b97ee82c202e54ec238057",
+    "revision": "b5d051dbbc777add8d80104d02eed132b8e087da",
     "revisionRole": "base-commit",
-    "sourceState": "working-tree-release-overlay"
+    "sourceState": "local-release-overlay"
   }
 }
